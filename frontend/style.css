@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+
 
 .tab-content {
   display: none;
@@ -74,4 +76,64 @@
     opacity: 0;
     display: none;
   }
+}
+
+.suggestions-dropdown {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 0.25rem;
+}
+
+.active {
+    background-color: #2b6cb0 !important;
+}
+
+.tab-content {
+    border-radius: 0.25rem;
+    padding: 1rem;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#toast {
+    transition: opacity 0.5s ease-in-out;
+}
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background-color: green;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+input[type="text"], input[type="number"] {
+  border-radius: 0.5rem;
+}
+
+.tab-button {
+  border-radius: 0.5rem;
+}
+
+.tab-content {
+  border-radius: 0.5rem;
+}
+
+table {
+  border-radius: 0.5rem;
+}
+
+thead {
+  border-radius: 0.5rem;
+}
+
+tbody {
+  border-radius: 0.5rem;
 }

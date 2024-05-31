@@ -1,50 +1,60 @@
-function getSuggestions(query) {
-  const data = JSON.parse(localStorage.getItem('items')) || [];
-  return data.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const customerPhoneInput = document.getElementById('customer-phone');
+  const refererPhoneInput = document.getElementById('referer-phone');
+  const itemNameInputs = document.querySelectorAll('.item-name');
 
-function attachSuggestions(input) {
-  const suggestionBox = document.createElement('div');
-  suggestionBox.className = 'suggestion-box absolute bg-white shadow-md rounded z-10';
-  suggestionBox.style.display = 'none';
-  document.body.appendChild(suggestionBox);
+  customerPhoneInput.addEventListener('input', () => showSuggestions(customerPhoneInput, 'customers'));
+  refererPhoneInput.addEventListener('input', () => showSuggestions(refererPhoneInput, 'referers'));
+  itemNameInputs.forEach(input => input.addEventListener('input', () => showSuggestions(input, 'items')));
 
-  input.addEventListener('input', function () {
-    const query = input.value.trim();
-    const suggestions = getSuggestions(query);
-    suggestionBox.innerHTML = '';
+  function showSuggestions(input, type) {
+    const value = input.value.toLowerCase();
+    const suggestionsDropdown = createSuggestionsDropdown(input);
+    suggestionsDropdown.innerHTML = '';
+
+    let suggestions = [];
+    if (type === 'customers' || type === 'referers') {
+      const data = JSON.parse(localStorage.getItem(type)) || [];
+      suggestions = data.filter(item => item.phone.toLowerCase().includes(value));
+    } else if (type === 'items') {
+      const items = JSON.parse(localStorage.getItem('items')) || [];
+      suggestions = items.filter(item => item.name.toLowerCase().includes(value));
+    }
+
     suggestions.forEach(suggestion => {
-      const suggestionItem = document.createElement('div');
-      suggestionItem.className = 'suggestion-item p-2 cursor-pointer hover:bg-gray-200';
-      suggestionItem.textContent = suggestion.name;
-      suggestionItem.addEventListener('click', function () {
-        input.value = suggestion.name;
-        suggestionBox.style.display = 'none';
-      });
-      suggestionBox.appendChild(suggestionItem);
+      const li = document.createElement('li');
+      if (type === 'customers' || type === 'referers') {
+        li.textContent = `${suggestion.phone} (${suggestion.name})`;
+        li.addEventListener('click', () => {
+          input.value = suggestion.phone;
+          if (type === 'customers') {
+            document.getElementById('customer-name').value = suggestion.name;
+          } else {
+            document.getElementById('referer-name').value = suggestion.name;
+          }
+          suggestionsDropdown.remove();
+        });
+      } else if (type === 'items') {
+        li.textContent = `${suggestion.name} ($${suggestion.price})`;
+        li.addEventListener('click', () => {
+          input.value = suggestion.name;
+          const row = input.closest('tr');
+          row.querySelector('.item-price').value = suggestion.price;
+          suggestionsDropdown.remove();
+        });
+      }
+      suggestionsDropdown.appendChild(li);
     });
+  }
 
-    if (suggestions.length > 0) {
-      suggestionBox.style.display = 'block';
-    } else {
-      suggestionBox.style.display = 'none';
+  function createSuggestionsDropdown(input) {
+    let suggestionsDropdown = input.nextElementSibling;
+    if (suggestionsDropdown && suggestionsDropdown.classList.contains('suggestions-dropdown')) {
+      suggestionsDropdown.remove();
     }
-
-    const rect = input.getBoundingClientRect();
-    suggestionBox.style.top = `${rect.bottom + window.scrollY}px`;
-    suggestionBox.style.left = `${rect.left + window.scrollX}px`;
-    suggestionBox.style.width = `${rect.width}px`;
-  });
-
-  document.addEventListener('click', function (event) {
-    if (!suggestionBox.contains(event.target) && event.target !== input) {
-      suggestionBox.style.display = 'none';
-    }
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.item-name').forEach(input => {
-    attachSuggestions(input);
-  });
+    suggestionsDropdown = document.createElement('ul');
+    suggestionsDropdown.className = 'suggestions-dropdown';
+    input.parentNode.appendChild(suggestionsDropdown);
+    return suggestionsDropdown;
+  }
 });

@@ -1,156 +1,113 @@
-function saveSaleToLocalStorage(sale) {
-  let salesData = JSON.parse(localStorage.getItem('salesData')) || [];
-  salesData.push(sale);
-  localStorage.setItem('salesData', JSON.stringify(salesData));
+document.addEventListener('DOMContentLoaded', () => {
+  const clearDataButton = document.getElementById('clear-data');
+  
+  clearDataButton.addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear all data?')) {
+      localStorage.clear();
+      showToast('Data cleared successfully');
+      loadCustomerList();
+      loadRefererList();
+      loadSalesHistory();
+    }
+  });
+
   loadCustomerList();
-  loadCommissionList();
+  loadRefererList();
   loadSalesHistory();
-}
 
-function loadCustomerList() {
-  let salesData = JSON.parse(localStorage.getItem('salesData')) || [];
-  let customerData = {};
-
-  salesData.forEach(sale => {
-    const { customerName, customerPhone, items } = sale;
-    const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
-    const totalProfit = items.reduce((sum, item) => sum + (item.price - item.cost) * item.qty, 0);
-
-    if (!customerData[customerPhone]) {
-      customerData[customerPhone] = {
-        name: customerName,
-        totalSpent: 0,
-        totalProfit: 0
-      };
-    }
-
-    customerData[customerPhone].totalSpent += totalPrice;
-    customerData[customerPhone].totalProfit += totalProfit;
-  });
-
-  const customerList = document.getElementById('customer-list');
-  customerList.innerHTML = '';
-
-  for (let phone in customerData) {
-    const customer = customerData[phone];
-    const div = document.createElement('div');
-    div.className = 'p-2 border-b border-gray-200';
-    div.innerHTML = `
-      <div><strong>Name:</strong> ${customer.name}</div>
-      <div><strong>Phone:</strong> ${phone}</div>
-      <div><strong>Total Spent:</strong> $${customer.totalSpent.toFixed(2)}</div>
-      <div><strong>Total Profit:</strong> $${customer.totalProfit.toFixed(2)}</div>
-    `;
-    customerList.appendChild(div);
-  }
-}
-
-function loadCommissionList() {
-  let salesData = JSON.parse(localStorage.getItem('salesData')) || [];
-  let refererData = {};
-
-  salesData.forEach(sale => {
-    const { refererName, refererPhone, items } = sale;
-    const totalProfit = items.reduce((sum, item) => sum + (item.price - item.cost) * item.qty, 0);
-
-    if (!refererData[refererPhone]) {
-      refererData[refererPhone] = {
-        name: refererName,
-        totalCommission: 0
-      };
-    }
-
-    refererData[refererPhone].totalCommission += totalProfit;
-  });
-
-  const commissionList = document.getElementById('commission-list');
-  commissionList.innerHTML = '';
-
-  for (let phone in refererData) {
-    const referer = refererData[phone];
-    const div = document.createElement('div');
-    div.className = 'p-2 border-b border-gray-200';
-    div.innerHTML = `
-      <div><strong>Name:</strong> ${referer.name}</div>
-      <div><strong>Phone:</strong> ${phone}</div>
-      <div><strong>Total Commission:</strong> $${referer.totalCommission.toFixed(2)}</div>
-    `;
-    commissionList.appendChild(div);
-  }
-}
-
-function loadSalesHistory() {
-  let salesData = JSON.parse(localStorage.getItem('salesData')) || [];
-  let groupedSales = {};
-
-  salesData.forEach(sale => {
-    const saleDate = sale.date.split('T')[0];
-
-    if (!groupedSales[saleDate]) {
-      groupedSales[saleDate] = [];
-    }
-
-    groupedSales[saleDate].push(sale);
-  });
-
-  const salesHistoryList = document.getElementById('sales-history-list');
-  salesHistoryList.innerHTML = '';
-
-  let totalSalesMonth = 0;
-  let totalProfitMonth = 0;
-  let totalSales = 0;
-  let totalProfit = 0;
-  const currentMonth = new Date().toISOString().slice(0, 7);
-
-  for (let date in groupedSales) {
-    const salesOnDate = groupedSales[date];
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'p-2 border-b border-gray-200';
-    dateDiv.innerHTML = `<strong>Date:</strong> ${date}`;
-    const salesDiv = document.createElement('div');
-    salesDiv.className = 'pl-4';
-
-    salesOnDate.forEach(sale => {
-      const { customerName, totalQty, totalPrice, items } = sale;
-      const totalProfitSale = items.reduce((sum, item) => sum + (item.price - item.cost) * item.qty, 0);
-      
-      if (sale.date.startsWith(currentMonth)) {
-        totalSalesMonth += totalPrice;
-        totalProfitMonth += totalProfitSale;
-      }
-
-      totalSales += totalPrice;
-      totalProfit += totalProfitSale;
-
-      const saleDiv = document.createElement('div');
-      saleDiv.innerHTML = `
-        <div><strong>Customer:</strong> ${customerName}</div>
-        <div><strong>Total Qty:</strong> ${totalQty}</div>
-        <div><strong>Total Price:</strong> $${totalPrice.toFixed(2)}</div>
-        <div><strong>Total Profit:</strong> $${totalProfitSale.toFixed(2)}</div>
+  function loadCustomerList() {
+    const customerList = document.getElementById('customer-list');
+    const customers = JSON.parse(localStorage.getItem('customers')) || [];
+    customerList.innerHTML = '';
+    customers.forEach(customer => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="border px-4 py-2">${customer.name}</td>
+        <td class="border px-4 py-2">${customer.phone}</td>
+        <td class="border px-4 py-2">$${customer.totalPurchased.toFixed(2)}</td>
+        <td class="border px-4 py-2">$${customer.totalProfit.toFixed(2)}</td>
       `;
-      salesDiv.appendChild(saleDiv);
+      customerList.appendChild(row);
+    });
+  }
+
+  function loadRefererList() {
+    const refererList = document.getElementById('referer-list');
+    const referers = JSON.parse(localStorage.getItem('referers')) || [];
+    refererList.innerHTML = '';
+    referers.forEach(referer => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="border px-4 py-2">${referer.name}</td>
+        <td class="border px-4 py-2">${referer.phone}</td>
+        <td class="border px-4 py-2">$${referer.commission.toFixed(2)}</td>
+      `;
+      refererList.appendChild(row);
+    });
+  }
+
+  function loadSalesHistory() {
+    const salesHistoryList = document.getElementById('sales-history-list');
+    const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+    salesHistoryList.innerHTML = '';
+    salesHistory.forEach((sale, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="border px-4 py-2">${sale.date}</td>
+        <td class="border px-4 py-2">${index + 1}</td>
+        <td class="border px-4 py-2">${sale.customer}</td>
+        <td class="border px-4 py-2">$${sale.totalSales.toFixed(2)}</td>
+        <td class="border px-4 py-2">$${sale.totalProfit.toFixed(2)}</td>
+        <td class="border px-4 py-2"><button class="view-details" data-id="${sale.orderId}">View Details</button></td>
+      `;
+      salesHistoryList.appendChild(row);
     });
 
-    dateDiv.appendChild(salesDiv);
-    salesHistoryList.appendChild(dateDiv);
+    document.querySelectorAll('.view-details').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const orderId = e.target.dataset.id;
+        const sale = salesHistory.find(s => s.orderId === orderId);
+        if (sale) {
+          showModal(sale);
+        }
+      });
+    });
   }
 
-  document.getElementById('monthly-sales').textContent = totalSalesMonth.toFixed(2);
-  document.getElementById('monthly-profit').textContent = totalProfitMonth.toFixed(2);
-  document.getElementById('total-sales').textContent = totalSales.toFixed(2);
-  document.getElementById('total-profit').textContent = totalProfit.toFixed(2);
-}
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
 
-document.getElementById('clear-data').addEventListener('click', function () {
-  localStorage.clear();
-  loadCustomerList();
-  loadCommissionList();
-  loadSalesHistory();
-    showToast('Data cleared successfully!', 'success');
-  
-
-  loadCustomerList();
-  loadCommissions();
-  loadSalesHistory();
+  function showModal(sale) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center';
+    modal.innerHTML = `
+      <div class="bg-white rounded p-4">
+        <h2 class="text-xl mb-4">Order Details</h2>
+        <p><strong>Order ID:</strong> ${sale.orderId}</p>
+        <p><strong>Date:</strong> ${sale.date}</p>
+        <p><strong>Customer:</strong> ${sale.customer}</p>
+        <p><strong>Referer:</strong> ${sale.referer}</p>
+        <p><strong>Total Sales:</strong> $${sale.totalSales.toFixed(2)}</p>
+        <p><strong>Total Profit:</strong> $${sale.totalProfit.toFixed(2)}</p>
+        <h3 class="text-lg mt-4">Items</h3>
+        <ul>
+          ${sale.items.map(item => `
+            <li>${item.name} - $${item.price} x ${item.qty} = $${item.total}</li>
+          `).join('')}
+        </ul>
+        <button class="mt-4 px-4 py-2 bg-red-500 text-white rounded close-modal">Close</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('.close-modal').addEventListener('click', () => {
+      modal.remove();
+    });
+  }
 });

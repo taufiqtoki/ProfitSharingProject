@@ -3,136 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Friendship Communication System</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <link rel="icon" href="ico.svg" type="image/svg+xml">
+  <title>POS System</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <style>
-    .text-dark-gold {
-      color: #b8860b;
+    .active-tab {
+      background-color: #4caf50;
+      color: white;
     }
-    .nav-buttons {
-      display: flex;
-      flex-wrap: wrap;
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: green;
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
-    .nav-buttons button {
-      flex: 1 1 48%;
-      margin: 4px;
+    .suggestions-dropdown {
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      z-index: 1000;
+      width: calc(100% - 2rem);
+      margin-top: 0.5rem;
     }
-    @media (min-width: 640px) {
-      .nav-buttons {
-        flex-wrap: nowrap;
-      }
-      .nav-buttons button {
-        flex: 1;
-        margin: 0;
-        margin-right: 8px;
-      }
+    .suggestions-dropdown li {
+      padding: 0.5rem;
+      cursor: pointer;
     }
-    .rounded {
-      border-radius: 0.375rem;
+    .suggestions-dropdown li:hover {
+      background-color: #f0f0f0;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    th {
-      background-color: #f2f2f2;
+    button:active {
+      box-shadow: 0 5px #666;
+      transform: translateY(4px);
     }
   </style>
 </head>
 <body class="bg-gray-100">
-  <header class="bg-white text-dark-gold text-center py-4 shadow-md">
-    <h1 class="text-3xl font-bold">Profit Sharing Project by Friendship Communication System</h1>
-  </header>
-  <main class="container mx-auto mt-8 px-4" style="width: 90%;">
-    <div class="mb-4 nav-buttons" style="width: 90%; margin: 0 auto;">
-      <button class="tab-button bg-blue-500 text-white px-4 py-2 rounded mr-2 active" data-tab="pos">POS</button>
-      <button class="tab-button bg-blue-500 text-white px-4 py-2 rounded mr-2" data-tab="customers">Customers</button>
-      <button class="tab-button bg-blue-500 text-white px-4 py-2 rounded mr-2" data-tab="commissions">Commissions</button>
-      <button class="tab-button bg-blue-500 text-white px-4 py-2 rounded mr-2" data-tab="sales-history">Sales History</button>
+
+  <nav class="p-4 bg-gray-800 text-white flex justify-between">
+    <h1 class="text-xl font-bold">POS System</h1>
+    <div>
+      <button data-tab="pos" class="tab-button active-tab px-4 py-2 rounded">POS</button>
+      <button data-tab="customers" class="tab-button px-4 py-2 rounded">Customers</button>
+      <button data-tab="referers" class="tab-button px-4 py-2 rounded">Referers</button>
+      <button data-tab="sales-history" class="tab-button px-4 py-2 rounded">Sales History</button>
+      <button id="clear-data" class="px-4 py-2 bg-red-500 text-white rounded">Clear Data</button>
     </div>
-     
-    <!-- POS Tab -->
-    <div class="tab-content" id="pos-tab">
-      <h2 class="text-xl font-bold mb-4 text-center">POS</h2>
-      <div class="overflow-x-auto">
-        <table class="table-auto w-full bg-white shadow-md rounded border border-gray-200">
+  </nav>
+
+  <main class="p-4">
+    <section id="pos-tab" class="tab-content">
+      <form id="pos-form">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="customer-name" class="block">Customer Name</label>
+            <input id="customer-name" type="text" class="w-full p-2 border rounded">
+          </div>
+          <div>
+            <label for="customer-phone" class="block">Customer Phone</label>
+            <input id="customer-phone" type="text" class="w-full p-2 border rounded">
+          </div>
+          <div>
+            <label for="referer-name" class="block">Referer Name</label>
+            <input id="referer-name" type="text" class="w-full p-2 border rounded">
+          </div>
+          <div>
+            <label for="referer-phone" class="block">Referer Phone</label>
+            <input id="referer-phone" type="text" class="w-full p-2 border rounded">
+          </div>
+        </div>
+        <table class="w-full bg-white rounded shadow-lg">
           <thead>
-            <tr class="bg-gray-200 text-left">
-              <th class="p-2 border border-gray-300" style="width: 10vw;">#</th>
-              <th class="p-2 border border-gray-300" style="width: 20vw;">Item Name</th>
-              <th class="p-2 border border-gray-300">Price</th>
-              <th class="p-2 border border-gray-300">Qty</th>
-              <th class="p-2 border border-gray-300">CPP</th>
-              <th class="p-2 border border-gray-300">Total Price</th>
+            <tr class="bg-gray-200">
+              <th class="w-10 border px-4 py-2">#</th>
+              <th class="w-2/10 border px-4 py-2">Item Name</th>
+              <th class="w-2/10 border px-4 py-2">Item Price</th>
+              <th class="w-2/10 border px-4 py-2">Qty</th>
+              <th class="w-2/10 border px-4 py-2">CPP</th>
+              <th class="w-2/10 border px-4 py-2">Total</th>
+              <th class="border px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody id="pos-items">
-            <!-- Items will be added here dynamically -->
           </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2" class="p-2">
-                <button id="add-item" class="bg-green-500 text-white px-4 py-2 rounded">+</button>
-                <button id="remove-item" class="bg-red-500 text-white px-4 py-2 rounded">-</button>
-              </td>
-              <td class="text-right p-2 font-bold">Total Qty:</td>
-              <td id="products-total" class="p-2 border border-gray-300">0</td>
-              <td class="text-right p-2 font-bold">Grand Total:</td>
-              <td id="total-price" class="p-2 border border-gray-300">0</td>
-            </tr>
-          </tfoot>
         </table>
-      </div>
-      <div class="mt-4">
-        <form id="customer-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" id="customer-name" placeholder="Customer Name" class="border p-2 rounded" required>
-          <input type="tel" id="customer-phone" placeholder="Customer Phone" class="border p-2 rounded" required>
-          <input type="text" id="referer-name" placeholder="Referer Name" class="border p-2 rounded">
-          <input type="tel" id="referer-phone" placeholder="Referer Phone" class="border p-2 rounded">
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded shadow-md col-span-1 md:col-span-2">Submit Sale</button>
-        </form>
-      </div>
-    </div>
+        <div class="flex justify-between items-center mt-4">
+          <button type="button" id="add-item" class="px-4 py-2 bg-blue-500 text-white rounded">Add Item</button>
+          <button type="button" id="remove-item" class="px-4 py-2 bg-red-500 text-white rounded">Remove Item</button>
+          <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Submit Sale</button>
+        </div>
+        <div class="mt-4">
+          <p>Total Products: <span id="products-total">0</span></p>
+          <p>Total Price: $<span id="total-price">0.00</span></p>
+        </div>
+      </form>
+    </section>
 
-    <!-- Customers Tab -->
-    <div class="tab-content hidden" id="customers-tab">
-      <h2 class="text-xl font-bold mb-4">Customers</h2>
-      <div id="customer-list">
-        <!-- Customer list will be populated here -->
-      </div>
-    </div>
+    <section id="customers-tab" class="tab-content hidden">
+      <h2 class="text-2xl mb-4">Customers</h2>
+      <table class="w-full bg-white rounded shadow-lg">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border px-4 py-2">Name</th>
+            <th class="border px-4 py-2">Phone</th>
+            <th class="border px-4 py-2">Total Purchased</th>
+            <th class="border px-4 py-2">Total Profit</th>
+          </tr>
+        </thead>
+        <tbody id="customer-list">
+        </tbody>
+      </table>
+      <input id="customer-search" type="text" class="mt-4 w-full p-2 border rounded" placeholder="Search Customers...">
+    </section>
 
-    <!-- Commissions Tab -->
-    <div class="tab-content hidden" id="commissions-tab">
-      <h2 class="text-xl font-bold mb-4">Commissions</h2>
-      <div id="commission-list">
-        <!-- Commissions list will be populated here -->
-      </div>
-    </div>
+    <section id="referers-tab" class="tab-content hidden">
+      <h2 class="text-2xl mb-4">Referers</h2>
+      <table class="w-full bg-white rounded shadow-lg">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border px-4 py-2">Name</th>
+            <th class="border px-4 py-2">Phone</th>
+            <th class="border px-4 py-2">Commission</th>
+          </tr>
+        </thead>
+        <tbody id="referer-list">
+        </tbody>
+      </table>
+      <input id="referer-search" type="text" class="mt-4 w-full p-2 border rounded" placeholder="Search Referers...">
+    </section>
 
-    <!-- Sales History Tab -->
-    <div class="tab-content hidden" id="sales-history-tab">
-      <h2 class="text-xl font-bold mb-4">Sales History</h2>
-      <div id="sales-history-list">
-        <!-- Sales history will be populated here -->
-      </div>
-      <div class="mt-4">
-        <p>Total Sales This Month: $<span id="monthly-sales">0</span></p>
-        <p>Total Profit This Month: $<span id="monthly-profit">0</span></p>
-        <p>Total Sales Till Date: $<span id="total-sales">0</span></p>
-        <p>Total Profit Till Date: $<span id="total-profit">0</span></p>
-      </div>
-      <button id="clear-data" class="bg-red-500 text-white px-4 py-2 rounded mt-4">Clear Data</button>
-    </div>
+    <section id="sales-history-tab" class="tab-content hidden">
+      <h2 class="text-2xl mb-4">Sales History</h2>
+      <table class="w-full bg-white rounded shadow-lg">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border px-4 py-2">Date</th>
+            <th class="border px-4 py-2">Order #</th>
+            <th class="border px-4 py-2">Customer</th>
+            <th class="border px-4 py-2">Total Sales</th>
+            <th class="border px-4 py-2">Total Profit</th>
+            <th class="border px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sales-history-list">
+        </tbody>
+      </table>
+      <input id="sales-history-search" type="text" class="mt-4 w-full p-2 border rounded" placeholder="Search Sales History...">
+    </section>
   </main>
-  <script src="tabs.js"></script>
-  <script src="pos.js"></script>
+
   <script src="localstorage.js"></script>
+  <script src="pos.js"></script>
   <script src="suggestions.js"></script>
+  <script src="tabs.js"></script>
 </body>
 </html>

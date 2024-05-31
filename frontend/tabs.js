@@ -1,21 +1,24 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
 
-  function showTab(tabName) {
-    tabContents.forEach(content => {
-      content.classList.toggle('hidden', content.id !== `${tabName}-tab`);
-    });
-    tabButtons.forEach(button => {
-      button.classList.toggle('active', button.dataset.tab === tabName);
-    });
-  }
-
   tabButtons.forEach(button => {
-    button.addEventListener('click', function () {
-      showTab(this.dataset.tab);
+    button.addEventListener('click', () => {
+      const targetTab = button.dataset.tab;
+      
+      tabButtons.forEach(btn => btn.classList.remove('active-tab'));
+      button.classList.add('active-tab');
+      
+      tabContents.forEach(content => {
+        content.id === `${targetTab}-tab` ? content.classList.remove('hidden') : content.classList.add('hidden');
+      });
     });
   });
 
-  showTab('pos'); // Show POS tab by default
+  document.getElementById('pos-form').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      document.getElementById('add-item').click();
+    }
+  });
 });
