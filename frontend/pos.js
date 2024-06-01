@@ -8,13 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
   let itemIndex = 1;
 
   addItemButton.addEventListener('click', addItem);
-  removeItemButton.addEventListener('click', removeItem);
   posForm.addEventListener('submit', submitSale);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addItem();
+    }
+    if (event.key === 'Delete') {
+      const focusedElement = document.activeElement;
+      if (focusedElement && focusedElement.closest('tr')) {
+        focusedElement.closest('tr').remove();
+        reSequenceItems();
+        recalculateTotals();
+      }
+    }
+  });
 
   function addItem() {
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td class="border px-4 py-2">${itemIndex++}</td>
+      <td class="border px-4 py-2 item-number">${itemIndex++}</td>
       <td class="border px-4 py-2"><input type="text" class="item-name w-full p-2 border rounded" data-type="items"></td>
       <td class="border px-4 py-2"><input type="number" class="item-price w-full p-2 border rounded"></td>
       <td class="border px-4 py-2"><input type="number" class="item-qty w-full p-2 border rounded" value="1"></td>
@@ -23,27 +37,36 @@ document.addEventListener('DOMContentLoaded', () => {
       <td class="border px-4 py-2"><button type="button" class="remove-row bg-red-500 text-white px-2 py-1 rounded">Delete</button></td>
     `;
     posItems.appendChild(row);
+
     row.querySelector('.item-name').addEventListener('input', showSuggestions);
     row.querySelector('.item-qty').addEventListener('input', calculateTotal);
     row.querySelector('.item-price').addEventListener('input', calculateTotal);
+    row.querySelector('.item-cpp').addEventListener('input', calculateTotal);
     row.querySelector('.remove-row').addEventListener('click', () => {
       row.remove();
+      reSequenceItems();
       recalculateTotals();
     });
+
+    row.querySelector('.item-qty').addEventListener('input', calculateTotal);
+    row.querySelector('.item-price').addEventListener('input', calculateTotal);
+    row.querySelector('.item-cpp').addEventListener('input', calculateTotal);
   }
 
-  function removeItem() {
-    if (posItems.lastChild) {
-      posItems.lastChild.remove();
-      recalculateTotals();
-    }
+  function reSequenceItems() {
+    itemIndex = 1;
+    posItems.querySelectorAll('tr').forEach(row => {
+      row.querySelector('.item-number').textContent = itemIndex++;
+    });
   }
 
   function calculateTotal(event) {
     const row = event.target.closest('tr');
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
     const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+    const cpp = parseFloat(row.querySelector('.item-cpp').value) || 0;
     const total = price * qty;
+    const profit = total - (cpp * qty);
     row.querySelector('.item-total').value = total.toFixed(2);
     recalculateTotals();
   }
@@ -70,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refererPhone = document.getElementById('referer-phone').value.trim();
 
     if (!customerName || !customerPhone) {
-      alert('Customer details are required.');
+      showToast('Customer details are required.', 'error');
       return;
     }
 
@@ -93,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (items.length === 0) {
-      alert('At least one item is required.');
+      showToast('At least one item is required.', 'error');
       return;
     }
 
@@ -117,9 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCustomer(customerName, customerPhone, totalSales, totalProfit);
     updateReferer(refererName, refererPhone, totalSales);
 
-    showToast('Sale submitted successfully');
+    showToast('Sale submitted successfully', 'success');
     posForm.reset();
     posItems.innerHTML = '';
+    itemIndex = 1;
     recalculateTotals();
     loadSalesHistory();
   }
@@ -149,13 +173,31 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRefererList();
   }
 
-  function showToast(message) {
+  function showToast(message, type) {
     const toast = document.createElement('div');
-    toast.className = 'toast';
+    toast.className = `toast ${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => {
       toast.remove();
     }, 3000);
   }
+
+  function showSuggestions(event) {
+    // Implement suggestions dropdown logic
+  }
+
+  function loadSalesHistory() {
+    // Implement loading sales history logic
+  }
+
+  function loadCustomerList() {
+    // Implement loading customer list logic
+  }
+
+  function loadRefererList() {
+    // Implement loading referer list logic
+  }
+
+  addItem(); // Add one row by default when the page loads
 });
